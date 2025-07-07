@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Créer un article{% endblock %}
+
+{% block content %}
+<style>
+  .form-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(22,33,62,0.10);
+    padding: 36px 32px;
+    margin: 40px auto;
+    color: #16213e;
+    max-width: 900px;
+  }
+  .form-label {
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 8px;
+  }
+  .form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #d2d6dc;
+    padding: 10px;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+  }
+  .btn-primary {
+    background: #7c3aed;
+    border: none;
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: 8px;
+  }
+  .btn-primary:hover {
+    background: #6d28d9;
+  }
+  .btn-secondary {
+    background: #e5e7eb;
+    border: none;
+    color: #4b5563;
+  }
+</style>
+
+<div class="form-card">
+<<<<<<< HEAD
+  <!-- Affichage des messages flash -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+=======
+>>>>>>> 45da105 (Premier commit)
+  <h2 class="mb-4">Créer un Nouvel Article</h2>
+  <form method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="title" class="form-label">Titre</label>
+      <input type="text" class="form-control" id="title" name="title" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="content" class="form-label">Contenu</label>
+<<<<<<< HEAD
+      <textarea class="form-control" id="content" name="content" rows="10"></textarea>
+=======
+      <textarea class="form-control" id="content" name="content" rows="10" required></textarea>
+>>>>>>> 45da105 (Premier commit)
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="category" class="form-label">Catégorie</label>
+        <select class="form-select" id="category" name="category" required>
+          <option value="Infrastructure">Infrastructure</option>
+          <option value="Applications">Applications</option>
+          <option value="Sécurité">Sécurité</option>
+          <option value="Procédures">Procédures</option>
+          <option value="FAQ">FAQ</option>
+        </select>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="importance" class="form-label">Importance</label>
+        <select class="form-select" id="importance" name="importance" required>
+          <option value="LOW">Basse</option>
+          <option value="MEDIUM">Moyenne</option>
+          <option value="HIGH">Haute</option>
+          <option value="CRITICAL">Critique</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="tags" class="form-label">Tags (séparés par des virgules)</label>
+      <input type="text" class="form-control" id="tags" name="tags">
+    </div>
+
+    <div class="mb-3">
+      <label for="attachments" class="form-label">Pièces Jointes</label>
+      <input class="form-control" type="file" id="attachments" name="attachments" multiple>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="d-flex justify-content-end gap-2">
+      <a href="{{ url_for('knowledge') }}" class="btn btn-secondary">Annuler</a>
+      <button type="submit" class="btn btn-primary">Créer l'Article</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<<<<<<< HEAD
+<!-- CKEditor 5 Super Build avec upload images/documents -->
+<script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-super-build@latest/build/ckeditor.js"></script>
+<script>
+  ClassicEditor
+    .create(document.querySelector('#content'), {
+      language: 'fr',
+      simpleUpload: {
+        uploadUrl: '/upload_ckeditor_image'
+      }
+    })
+    .catch(error => {
+      console.error(error);
+    });
+=======
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+tinymce.init({
+  selector: '#content',
+  height: 400,
+  menubar: false,
+  plugins: 'lists link image table code',
+  toolbar: 'undo redo | formatselect | bold italic underline | bullist numlist | link image table | code',
+  branding: false,
+  language: 'fr_FR'
+});
+>>>>>>> 45da105 (Premier commit)
+</script>
+{% endblock %} 

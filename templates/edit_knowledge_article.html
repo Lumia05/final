@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Modifier l'article{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-body">
+      <h2 class="card-title mb-4">Éditer l'article</h2>
+      
+      <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="title" class="form-label">Titre</label>
+          <input type="text" class="form-control" id="title" name="title" value="{{ article.title }}" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="content" class="form-label">Contenu</label>
+          <textarea class="form-control" id="content" name="content" rows="10" required>{{ article.content }}</textarea>
+        </div>
+        
+        <div class="mb-3">
+          <label for="category" class="form-label">Catégorie</label>
+          <select class="form-select" id="category" name="category" required>
+            <option value="Infrastructure" {% if article.category == 'Infrastructure' %}selected{% endif %}>Infrastructure</option>
+            <option value="Applications" {% if article.category == 'Applications' %}selected{% endif %}>Applications</option>
+            <option value="Sécurité" {% if article.category == 'Sécurité' %}selected{% endif %}>Sécurité</option>
+            <option value="Procédures" {% if article.category == 'Procédures' %}selected{% endif %}>Procédures</option>
+            <option value="FAQ" {% if article.category == 'FAQ' %}selected{% endif %}>FAQ</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label for="importance" class="form-label">Importance</label>
+          <select class="form-select" id="importance" name="importance" required>
+            <option value="LOW" {% if article.importance == 'LOW' %}selected{% endif %}>Basse</option>
+            <option value="MEDIUM" {% if article.importance == 'MEDIUM' %}selected{% endif %}>Moyenne</option>
+            <option value="HIGH" {% if article.importance == 'HIGH' %}selected{% endif %}>Haute</option>
+            <option value="CRITICAL" {% if article.importance == 'CRITICAL' %}selected{% endif %}>Critique</option>
+          </select>
+        </div>
+        
+        <div class="mb-3">
+          <label for="tags" class="form-label">Tags (séparés par des virgules)</label>
+          <input type="text" class="form-control" id="tags" name="tags" value="{{ article.tags|map(attribute='name')|join(', ') }}">
+        </div>
+        
+        <div class="mb-3">
+          <label for="attachments" class="form-label">Ajouter des pièces jointes</label>
+          <input type="file" class="form-control" id="attachments" name="attachments" multiple>
+        </div>
+        
+        {% if article.attachments %}
+        <div class="mb-3">
+          <label class="form-label">Pièces jointes existantes</label>
+          <ul class="list-group">
+            {% for attachment in article.attachments %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ attachment.filename }}
+              <a href="#" class="btn btn-sm btn-danger" onclick="deleteAttachment({{ attachment.id }})">
+                <i class="fas fa-trash"></i>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        
+        <div class="d-flex justify-content-between">
+          <a href="{{ url_for('view_knowledge_article', id=article.id) }}" class="btn btn-secondary">Annuler</a>
+          <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+tinymce.init({
+  selector: '#content',
+  height: 400,
+  menubar: false,
+  plugins: 'lists link image table code',
+  toolbar: 'undo redo | formatselect | bold italic underline | bullist numlist | link image table | code',
+  branding: false,
+  language: 'fr_FR'
+});
+
+function deleteAttachment(attachmentId) {
+  if (confirm('Êtes-vous sûr de vouloir supprimer cette pièce jointe ?')) {
+    fetch(`/knowledge/attachment/${attachmentId}/delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert('Erreur lors de la suppression de la pièce jointe');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Erreur lors de la suppression de la pièce jointe');
+    });
+  }
+}
+</script>
+{% endblock %} 

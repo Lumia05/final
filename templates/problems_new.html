@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% block title %}Gestion des Problèmes{% endblock %}
+
+{% block content %}
+<style>
+  body, .main-content {
+    background: #f4f8fc !important;
+  }
+  .problem-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(22,33,62,0.10);
+    padding: 36px 32px 28px 32px;
+    max-width: 1200px;
+    margin: 40px auto;
+    color: #16213e;
+  }
+  .form-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .form-label {
+    color: #2056b3;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .form-control, select.form-select {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    color: #16213e;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+  .form-control:focus, select.form-select:focus {
+    border-color: #2056b3;
+    box-shadow: 0 0 0 3px rgba(32,86,179,0.1);
+  }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f4f8fc;
+  }
+  .section-title {
+    font-size: 1.5em;
+    color: #2056b3;
+    font-weight: bold;
+    margin: 0;
+  }
+  .btn-create {
+    background: #2056b3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-create:hover {
+    background: #16213e;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+  .why-section {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 24px;
+  }
+  .why-group {
+    margin-bottom: 20px;
+  }
+  .why-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2056b3;
+    font-weight: 500;
+  }
+  .why-group textarea {
+    width: 100%;
+    min-height: 60px;
+  }
+  .solutions-section {
+    margin-top: 24px;
+  }
+  .btn-submit {
+    background: #2056b3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-weight: 600;
+    margin-top: 24px;
+    transition: all 0.2s;
+  }
+  .btn-submit:hover {
+    background: #16213e;
+    transform: translateY(-1px);
+  }
+  .problems-list {
+    margin-top: 40px;
+  }
+  .problem-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+  }
+  .problem-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .problem-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .problem-title {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #2056b3;
+    margin: 0;
+  }
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 500;
+  }
+  .status-open { background: #f0f9ff; color: #0369a1; }
+  .status-in_progress { background: #faf5ff; color: #7e22ce; }
+  .status-resolved { background: #f0fdf4; color: #16a34a; }
+  .status-closed { background: #f3f4f6; color: #4b5563; }
+  .table-responsive {
+    margin-top: 24px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+  .table {
+    margin-bottom: 0;
+  }
+  .table th {
+    background: #f8fafc;
+    color: #2056b3;
+    font-weight: 600;
+    border: none;
+    padding: 16px;
+  }
+  .table td {
+    padding: 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f4f8fc;
+  }
+  .table tr:last-child td {
+    border-bottom: none;
+  }
+  .btn-action {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    margin: 0 4px;
+  }
+</style>
+
+<div class="problem-card">
+  <div class="section-header">
+    <h2 class="section-title">Liste des Problèmes</h2>
+    <button type="button" class="btn btn-create" onclick="toggleForm()">
+      <i class="fas fa-plus"></i> Créer un problème
+    </button>
+  </div>
+
+  <div id="problemForm" class="form-section" style="display: none;">
+    <form method="POST" id="createProblemForm">
+      <div class="mb-3">
+        <label for="title" class="form-label">Problème (Titre)</label>
+        <input type="text" class="form-control" id="title" name="title" required 
+               placeholder="Entrez un titre descriptif du problème">
+      </div>
+
+      <div class="mb-3">
+        <label for="description" class="form-label">Description (détails du problème)</label>
+        <textarea class="form-control" id="description" name="description" rows="3" required
+                  placeholder="Décrivez le problème en détail"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="status" class="form-label">Statut</label>
+        <select id="status" name="status" class="form-select">
+          <option value="OPEN">Ouvert</option>
+          <option value="IN_PROGRESS">En cours</option>
+          <option value="RESOLVED">Résolu</option>
+          <option value="CLOSED">Fermé</option>
+        </select>
+      </div>
+
+      <div class="why-section">
+        <h3 class="mb-4">Analyse des 5 Pourquoi</h3>
+        
+        <div class="why-group">
+          <label for="why1">Pourquoi 1 : Pourquoi le problème est-il survenu ?</label>
+          <textarea class="form-control" id="why1" name="why1" required></textarea>
+        </div>
+
+        <div class="why-group">
+          <label for="why2">Pourquoi 2 : Pourquoi la cause précédente est-elle survenue ?</label>
+          <textarea class="form-control" id="why2" name="why2" required></textarea>
+        </div>
+
+        <div class="why-group">
+          <label for="why3">Pourquoi 3 : Et pourquoi cela ?</label>
+          <textarea class="form-control" id="why3" name="why3" required></textarea>
+        </div>
+
+        <div class="why-group">
+          <label for="why4">Pourquoi 4 : Quelle en est la cause plus profonde ?</label>
+          <textarea class="form-control" id="why4" name="why4" required></textarea>
+        </div>
+
+        <div class="why-group">
+          <label for="why5">Pourquoi 5 : Quelle est la cause racine ?</label>
+          <textarea class="form-control" id="why5" name="why5" required></textarea>
+        </div>
+      </div>
+
+      <div class="solutions-section">
+        <label for="root_cause" class="form-label">Cause racine identifiée</label>
+        <textarea class="form-control" id="root_cause" name="root_cause" rows="2" required
+                  placeholder="Résumez la cause racine identifiée"></textarea>
+
+        <label for="suggested_solutions" class="form-label mt-3">Solutions suggérées</label>
+        <textarea class="form-control" id="suggested_solutions" name="suggested_solutions" rows="3" required
+                  placeholder="Proposez des solutions pour résoudre le problème à sa racine"></textarea>
+      </div>
+
+      <div class="text-end">
+        <button type="button" class="btn btn-secondary me-2" onclick="toggleForm()">Annuler</button>
+        <button type="submit" class="btn btn-submit">Enregistrer le problème</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Titre</th>
+          <th>Description</th>
+          <th>Statut</th>
+          <th>Cause Racine</th>
+          <th>Solutions Suggérées</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if problems %}
+          {% for problem in problems %}
+          <tr>
+            <td>{{ problem.title }}</td>
+            <td>{{ problem.description[:100] }}...</td>
+            <td>
+              <span class="status-badge status-{{ problem.status.lower() }}">
+                {{ problem.status }}
+              </span>
+            </td>
+            <td>{{ problem.root_cause[:100] if problem.root_cause else '-' }}</td>
+            <td>{{ problem.suggested_solutions[:100] if problem.suggested_solutions else '-' }}</td>
+            <td>
+              <button class="btn btn-action btn-outline-primary" onclick="editProblem({{ problem.id }})">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-action btn-outline-danger" onclick="deleteProblem({{ problem.id }})">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" class="text-center text-muted">Aucun problème enregistré.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleForm() {
+  const form = document.getElementById('problemForm');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function editProblem(id) {
+  // TODO: Implémenter l'édition
+  console.log('Éditer le problème:', id);
+}
+
+function deleteProblem(id) {
+  if (confirm('Êtes-vous sûr de vouloir supprimer ce problème ?')) {
+    fetch(`/problems/${id}/delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert('Erreur lors de la suppression du problème');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Erreur lors de la suppression du problème');
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('createProblemForm');
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(form);
+    fetch('/problems', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        throw new Error('Erreur lors de la création du problème');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert(error.message);
+    });
+  });
+});
+</script>
+{% endblock %} 

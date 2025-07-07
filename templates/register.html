@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Inscription - ITIL Management System{% endblock %}
+
+{% block body %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <img src="{{ url_for('static', filename='logo-wise.png') }}" alt="Logo" class="auth-logo">
+            <h2>Créer un compte</h2>
+            <p>Rejoignez la plateforme de gestion ITIL</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+            <div class="form-group">
+                <label for="email">Adresse Email</label>
+                <input type="email" id="email" name="email" required class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" required class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label for="team">Équipe</label>
+                <input type="text" id="team" name="team" required class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Rôle</label>
+                <select id="role" name="role" class="form-control">
+                    <option value="user" selected>Utilisateur</option>
+                    <option value="admin">Administrateur</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+                S'inscrire
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Vous avez déjà un compte ? 
+                <a href="{{ url_for('login') }}">Se connecter</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

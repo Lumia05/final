@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body, .bg-dark-custom { background: #181f2a !important; }
+  .sidebar-dark { background: #232b3e; min-height: 100vh; }
+  .sidebar-dark .nav-link, .sidebar-dark .navbar-brand { color: #b0b8c1; }
+  .sidebar-dark .nav-link.active, .sidebar-dark .nav-link:hover { color: #fff; background: #1a2233; }
+  .dashboard-header { color: #fff; font-size: 2.2rem; font-weight: bold; margin-bottom: 2rem; }
+  .btn-primary, .btn-success, .btn-danger { border-radius: 8px; }
+  .table-dark th, .table-dark td { vertical-align: middle; }
+  .offcanvas-header, .offcanvas-body { background: #232b3e; color: #fff; }
+  .modal-content { background: #232b3e; color: #fff; }
+  .form-label { color: #b0b8c1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid bg-dark-custom py-4">
+  <div class="row">
+    <nav class="col-md-2 d-none d-md-block sidebar-dark sidebar">
+      <div class="position-sticky pt-4">
+        <ul class="nav flex-column">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link active" href="{{ url_for('incidents') }}"><i class="fas fa-exclamation-circle me-2"></i> Incidents</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('problems') }}"><i class="fas fa-bug me-2"></i> Problèmes</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('knowledge') }}"><i class="fas fa-book me-2"></i> Base de connaissances</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('users') }}"><i class="fas fa-cog me-2"></i> Users</a></li>
+        </ul>
+      </div>
+    </nav>
+    <main class="col-md-10 ms-sm-auto px-md-5 py-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="dashboard-header">Gestion des Incidents</div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCreateIncident"><i class="fas fa-plus me-2"></i> Nouvel incident</button>
+      </div>
+      <div class="card bg-dark text-white shadow-sm mb-4">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Titre</th>
+                  <th>Priorité</th>
+                  <th>Statut</th>
+                  <th>Assigné à</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for incident in incidents %}
+                <tr>
+                  <td>{{ incident.id }}</td>
+                  <td>{{ incident.title }}</td>
+                  <td><span class="badge bg-{{ 'danger' if incident.priority.value=='P1' else 'warning' if incident.priority.value=='P2' else 'info' }}">{{ incident.priority.value }}</span></td>
+                  <td><span class="badge bg-{{ 'primary' if incident.status.value=='OPEN' else 'warning' if incident.status.value=='IN_PROGRESS' else 'success' if incident.status.value=='RESOLVED' else 'secondary' }}">{{ incident.status.value }}</span></td>
+                  <td>{{ incident.owner or 'Non assigné' }}</td>
+                  <td>{{ incident.incident_date.strftime('%Y-%m-%d %H:%M') if incident.incident_date else incident.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                  <td>
+<<<<<<< HEAD
+                    <button
+                      class="btn btn-sm btn-info me-1"
+                      data-bs-toggle="modal"
+                      data-bs-target="#viewIncidentModal"
+                      data-incident='{"id": "{{ incident.id }}", "title": "{{ incident.title|e }}", "description": "{{ incident.description|e }}", "priority": "{{ incident.priority.value if incident.priority else '' }}", "status": "{{ incident.status.value if incident.status else '' }}", "assigned_to": "{{ incident.owner or 'Non assigné' }}", "incident_date": "{{ incident.incident_date.strftime('%Y-%m-%d %H:%M') if incident.incident_date else '' }}", "created_at": "{{ incident.created_at.strftime('%Y-%m-%d %H:%M') if incident.created_at else '' }}" }'
+                      title="Voir"
+                      onclick="viewIncident(JSON.parse(this.getAttribute('data-incident')))">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-warning me-1" data-bs-toggle="modal" data-bs-target="#modalEditIncident{{ incident.id }}" title="Éditer"><i class="fas fa-edit"></i></button>
+                    <form method="post" action="{{ url_for('incidents') }}" class="d-inline" onsubmit="return confirm('Supprimer cet incident ?');">
+                      <input type="hidden" name="action" value="delete_{{ incident.id }}">
+                      <button class="btn btn-sm btn-danger" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
+=======
+                    <button class="btn btn-sm btn-outline-light me-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvasIncident{{ incident.id }}" title="Voir"><i class="fas fa-search"></i></button>
+                    <button class="btn btn-sm btn-outline-success me-1" data-bs-toggle="modal" data-bs-target="#modalEditIncident{{ incident.id }}" title="Éditer"><i class="fas fa-pen"></i></button>
+                    <form method="post" action="{{ url_for('incidents') }}" class="d-inline" onsubmit="return confirm('Supprimer cet incident ?');">
+                      <input type="hidden" name="action" value="delete_{{ incident.id }}">
+                      <button class="btn btn-sm btn-outline-danger" title="Supprimer"><i class="fas fa-trash"></i></button>
+>>>>>>> 45da105 (Premier commit)
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Modals édition -->
+      {% for incident in incidents %}
+      <div class="modal fade" id="modalEditIncident{{ incident.id }}" tabindex="-1" aria-labelledby="modalEditIncidentLabel{{ incident.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <form method="post" action="{{ url_for('incidents') }}">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modalEditIncidentLabel{{ incident.id }}">Éditer l'incident #{{ incident.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <input type="hidden" name="action" value="edit_{{ incident.id }}">
+                <div class="mb-3">
+                  <label class="form-label">Titre</label>
+                  <input type="text" class="form-control" name="title_{{ incident.id }}" value="{{ incident.title }}" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Description</label>
+                  <textarea class="form-control" name="description_{{ incident.id }}" rows="2">{{ incident.description }}</textarea>
+                </div>
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Priorité</label>
+                    <select class="form-select" name="priority_{{ incident.id }}">
+                      <option value="P1" {% if incident.priority.value=='P1' %}selected{% endif %}>P1</option>
+                      <option value="P2" {% if incident.priority.value=='P2' %}selected{% endif %}>P2</option>
+                      <option value="P3" {% if incident.priority.value=='P3' %}selected{% endif %}>P3</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Statut</label>
+                    <select class="form-select" name="status_{{ incident.id }}">
+                      <option value="OPEN" {% if incident.status.value=='OPEN' %}selected{% endif %}>Ouvert</option>
+                      <option value="IN_PROGRESS" {% if incident.status.value=='IN_PROGRESS' %}selected{% endif %}>En cours</option>
+                      <option value="RESOLVED" {% if incident.status.value=='RESOLVED' %}selected{% endif %}>Résolu</option>
+                      <option value="CLOSED" {% if incident.status.value=='CLOSED' %}selected{% endif %}>Clos</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Assigné à</label>
+                    <input type="text" class="form-control" name="assigned_to_{{ incident.id }}" value="{{ incident.owner }}">
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-success">Enregistrer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+<<<<<<< HEAD
+      <!-- MODAL DE VISUALISATION DE L'INCIDENT -->
+      <div class="modal fade" id="viewIncidentModal" tabindex="-1" aria-labelledby="viewIncidentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+              <h5 class="modal-title" id="viewIncidentModalLabel">Détails de l'Incident</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <dl class="row">
+                <dt class="col-sm-3">Titre</dt>
+                <dd class="col-sm-9" id="view_incident_title"></dd>
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9" id="view_incident_description"></dd>
+                <dt class="col-sm-3">Priorité</dt>
+                <dd class="col-sm-9" id="view_incident_priority"></dd>
+                <dt class="col-sm-3">Statut</dt>
+                <dd class="col-sm-9" id="view_incident_status"></dd>
+                <dt class="col-sm-3">Assigné à</dt>
+                <dd class="col-sm-9" id="view_incident_assigned_to"></dd>
+                <dt class="col-sm-3">Date</dt>
+                <dd class="col-sm-9" id="view_incident_date"></dd>
+                <!-- Ajoute d'autres champs si besoin -->
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+=======
+      <!-- Offcanvas vue détaillée -->
+      {% for incident in incidents %}
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasIncident{{ incident.id }}" aria-labelledby="offcanvasIncidentLabel{{ incident.id }}">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasIncidentLabel{{ incident.id }}">Incident #{{ incident.id }} – {{ incident.title }}</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <div class="mb-3"><strong>Description :</strong><br>{{ incident.description }}</div>
+          <div class="row mb-2">
+            <div class="col-md-6"><strong>Priorité :</strong> {{ incident.priority.value }}</div>
+            <div class="col-md-6"><strong>Statut :</strong> {{ incident.status.value }}</div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-md-6"><strong>Assigné à :</strong> {{ incident.owner or 'Non assigné' }}</div>
+            <div class="col-md-6"><strong>Date :</strong> {{ incident.incident_date.strftime('%Y-%m-%d %H:%M') if incident.incident_date else incident.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+          </div>
+          <hr>
+          <div class="mb-2"><strong>Services affectés :</strong> {{ incident.affected_services }}</div>
+          <div class="mb-2"><strong>Équipes de réponse :</strong> {{ incident.response_teams }}</div>
+          <div class="mb-2"><strong>Parties prenantes :</strong> {{ incident.stakeholders }}</div>
+          <div class="mb-2"><strong>Durée :</strong> {{ incident.incident_duration }}</div>
+          <div class="mb-2"><strong>Incidents liés :</strong> {{ incident.related_incidents }}</div>
+          <hr>
+          <div class="mb-2"><strong>Origine :</strong> {{ incident.origin }}</div>
+          <div class="mb-2"><strong>Dysfonctionnement :</strong> {{ incident.malfunction }}</div>
+          <div class="mb-2"><strong>Impact :</strong> {{ incident.impact }}</div>
+          <div class="mb-2"><strong>Détection :</strong> {{ incident.detection }}</div>
+          <div class="mb-2"><strong>Réponse :</strong> {{ incident.response }}</div>
+          <div class="mb-2"><strong>Rétablissement :</strong> {{ incident.recovery }}</div>
+          <hr>
+          <div class="mb-2"><strong>5 Pourquoi :</strong>
+            <ol>
+              <li>{{ incident.why1 }}</li>
+              <li>{{ incident.why2 }}</li>
+              <li>{{ incident.why3 }}</li>
+              <li>{{ incident.why4 }}</li>
+              <li>{{ incident.why5 }}</li>
+            </ol>
+          </div>
+          <div class="mb-2"><strong>Enregistrements associés :</strong> {{ incident.associated_records }}</div>
+          <div class="mb-2"><strong>Leçons apprises :</strong> {{ incident.lessons_learned }}</div>
+        </div>
+      </div>
+      {% endfor %}
+>>>>>>> 45da105 (Premier commit)
+      <!-- Modal création -->
+      <div class="modal fade" id="modalCreateIncident" tabindex="-1" aria-labelledby="modalCreateIncidentLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <form method="post" action="{{ url_for('incidents') }}">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modalCreateIncidentLabel">Nouvel incident</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <input type="hidden" name="action" value="create">
+                <div class="mb-3">
+                  <label class="form-label">Titre</label>
+                  <input type="text" class="form-control" name="title" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Description</label>
+                  <textarea class="form-control" name="description" rows="2"></textarea>
+                </div>
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Priorité</label>
+                    <select class="form-select" name="priority">
+                      <option value="P1">P1</option>
+                      <option value="P2">P2</option>
+                      <option value="P3" selected>P3</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Statut</label>
+                    <select class="form-select" name="status">
+                      <option value="OPEN" selected>Ouvert</option>
+                      <option value="IN_PROGRESS">En cours</option>
+                      <option value="RESOLVED">Résolu</option>
+                      <option value="CLOSED">Clos</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Assigné à</label>
+                    <input type="text" class="form-control" name="assigned_to">
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-primary">Créer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+<<<<<<< HEAD
+<script>
+function viewIncident(incident) {
+    document.getElementById('view_incident_title').textContent = incident.title;
+    document.getElementById('view_incident_description').textContent = incident.description;
+    document.getElementById('view_incident_priority').textContent = incident.priority;
+    document.getElementById('view_incident_status').textContent = incident.status;
+    document.getElementById('view_incident_assigned_to').textContent = incident.assigned_to || 'Non assigné';
+    document.getElementById('view_incident_date').textContent = incident.incident_date || incident.created_at || '';
+    var viewModal = new bootstrap.Modal(document.getElementById('viewIncidentModal'));
+    viewModal.show();
+}
+</script>
+=======
+>>>>>>> 45da105 (Premier commit)
+{% endblock %} 

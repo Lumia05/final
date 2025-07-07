@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2>{{ article.title }}</h2>
+      <div>
+        <span class="badge bg-{{ 'success' if article.status == 'PUBLISHED' else 'warning' if article.status == 'IN_REVIEW' else 'secondary' }}">
+          {% if article.status == 'PUBLISHED' %}
+            Publié
+          {% elif article.status == 'IN_REVIEW' %}
+            En révision
+          {% else %}
+            Brouillon
+          {% endif %}
+        </span>
+        <span class="badge bg-{{ 'danger' if article.importance == 'CRITICAL' else 'warning' if article.importance == 'HIGH' else 'info' if article.importance == 'MEDIUM' else 'secondary' }}">
+          {% if article.importance == 'CRITICAL' %}
+            Critique
+          {% elif article.importance == 'HIGH' %}
+            Haute
+          {% elif article.importance == 'MEDIUM' %}
+            Moyenne
+          {% else %}
+            Basse
+          {% endif %}
+        </span>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <div class="article-meta mb-4">
+        <p>
+          <strong>Catégorie:</strong> {{ article.category }}<br>
+          <strong>Auteur:</strong> {{ article.author.email if article.author else 'Non assigné' }}<br>
+          <strong>Créé le:</strong> {{ article.created_at.strftime('%d/%m/%Y %H:%M') }}<br>
+          <strong>Mis à jour le:</strong> {{ article.updated_at.strftime('%d/%m/%Y %H:%M') }}
+        </p>
+      </div>
+
+      <div class="article-content mb-4">
+<<<<<<< HEAD
+        {% set lines = article.content.split('\n') %}
+        {% set section = None %}
+        {% set solutions = [] %}
+        {% for line in lines %}
+          {% if line.strip().startswith('**Description du Problème') %}
+            <strong>Description du Problème :</strong>
+            {% set section = 'description' %}
+          {% elif line.strip().startswith('**Cause Racine') %}
+            <br><strong>Cause Racine :</strong>
+            {% set section = 'cause' %}
+          {% elif line.strip().startswith('**Solutions Suggérées') %}
+            <br><strong>Solutions Suggérées/Mises en Œuvre :</strong>
+            <ul>
+            {% set section = 'solutions' %}
+          {% elif section == 'solutions' and line.strip() %}
+            <li>{{ line.strip().lstrip('-').strip() }}</li>
+          {% elif section == 'solutions' and not line.strip() %}
+            </ul>
+            {% set section = None %}
+          {% elif section == 'description' and line.strip() %}
+            <p>{{ line }}</p>
+          {% elif section == 'cause' and line.strip() %}
+            <p>{{ line }}</p>
+          {% endif %}
+        {% endfor %}
+        {% if section == 'solutions' %}</ul>{% endif %}
+=======
+        {{ article.content | safe }}
+>>>>>>> 45da105 (Premier commit)
+      </div>
+
+      {% if article.tags %}
+      <div class="article-tags mb-4">
+        <strong>Tags:</strong>
+        {% for tag in article.tags %}
+        <span class="badge bg-light text-dark">{{ tag.name }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if article.attachments %}
+      <div class="article-attachments mb-4">
+        <h5>Pièces jointes:</h5>
+        <ul class="list-group">
+          {% for attachment in article.attachments %}
+          <li class="list-group-item">
+            <i class="fas fa-paperclip"></i>
+            <a href="{{ url_for('static', filename=attachment.file_path) }}" target="_blank">
+              {{ attachment.filename }}
+            </a>
+            <small class="text-muted">(Ajouté le {{ attachment.uploaded_at.strftime('%d/%m/%Y %H:%M') }})</small>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if article.related_incidents %}
+      <div class="related-incidents mb-4">
+        <h5>Incidents liés:</h5>
+        <ul class="list-group">
+          {% for incident in article.related_incidents %}
+          <li class="list-group-item">
+            <a href="{{ url_for('view_incident', id=incident.id) }}">
+              {{ incident.title }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if article.related_problems %}
+      <div class="related-problems mb-4">
+        <h5>Problèmes liés:</h5>
+        <ul class="list-group">
+          {% for problem in article.related_problems %}
+          <li class="list-group-item">
+<<<<<<< HEAD
+            <a href="{{ url_for('problem_api_detail', id=problem.id) }}">
+=======
+            <a href="{{ url_for('view_problem', id=problem.id) }}">
+>>>>>>> 45da105 (Premier commit)
+              {{ problem.title }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card-footer">
+      <a href="{{ url_for('knowledge') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Retour
+      </a>
+      {% if current_user.id == article.author_id or current_user.role == 'admin' %}
+      <a href="{{ url_for('edit_knowledge_article', id=article.id) }}" class="btn btn-primary">
+        <i class="fas fa-edit"></i> Modifier
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %} 

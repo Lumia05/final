@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { background: #181f2a !important; }
+  .card { background: #232b3e; color: #fff; }
+  .form-label, .text-white { color: #fff !important; }
+  .btn-ai { background: #7c3aed; color: #fff; border: none; }
+  .btn-ai:hover { background: #6b2ad1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0 text-white">Documentation des Problèmes & Incidents</h2>
+        <button class="btn btn-outline-light rounded-pill" style="background: #7c3aed;" onclick="window.location.href='/dashboard'">
+            <i class="fas fa-arrow-left me-2"></i> Retour Dashboard
+        </button>
+    </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form action="/upload_doc" method="post" enctype="multipart/form-data" class="mb-4">
+                <label class="form-label">Ajouter un document Word (.doc, .docx) :</label>
+                <div class="input-group">
+                    <input type="file" name="doc_file" accept=".doc,.docx" class="form-control" required>
+                    <button class="btn btn-ai" type="submit">
+                        <i class="fas fa-upload me-2"></i>Uploader
+                    </button>
+                </div>
+            </form>
+            <h5 class="mb-3 text-white">Documents enregistrés :</h5>
+            <ul class="list-group">
+                {% for doc in docs %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{{ url_for('download_doc', filename=doc) }}" target="_blank">{{ doc }}</a>
+                    <a href="{{ url_for('delete_doc', filename=doc) }}" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer ce document ?')">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="list-group-item">Aucun document pour le moment.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- FontAwesome pour les icônes -->
+<script src="https://kit.fontawesome.com/4b8c3e6e0a.js" crossorigin="anonymous"></script>
+{% endblock %}

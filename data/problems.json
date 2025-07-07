@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "title": "gvhbjnk,dcfvghb",
+    "description": "cgvhb",
+    "status": "new",
+    "reporter": "admin",
+    "created_at": "2025-06-16 11:42:41",
+    "why_analysis": [
+      "réseau",
+      "serveur",
+      "base de donnés",
+      "carte réeau",
+      "cloud"
+    ],
+    "root_cause": "Défaillance ou surcharge du serveur.",
+    "solution": "Redémarrer le serveur, vérifier les logs, ou augmenter les ressources (CPU/RAM)."
+  },
+  {
+    "id": 2,
+    "title": "\n\n\nErreur 503- Service indisponible sur NGINX Production",
+    "description": "L’interface utilisateur renvoie des erreurs 503 intermittentes sur les pages publiques de l’application. Logs NGINX : upstream timed out (110) sur le port 8000",
+    "status": "new",
+    "reporter": "admin",
+    "created_at": "2025-06-16 12:05:58",
+    "why_analysis": [
+      "Pourquoi l’erreur 503 s’est-elle produite ? → Le serveur a arrêté de répondre",
+      "Pourquoi le serveur a-t-il arrêté de répondre ? → Le processus PHP-FPM était saturé",
+      "Pourquoi PHP-FPM était saturé ? → Trop de requêtes concurrentes non traitées",
+      "Pourquoi ces requêtes s’accumulaient-elles ? → La file d’attente des workers Laravel n’était pas vidée",
+      "Pourquoi la file d’attente n’était-elle pas vidée ? → Le job scheduler Laravel (queue:work) n’était pas lancé automatiquement au redéploiemen"
+    ],
+    "root_cause": "Défaillance ou surcharge du serveur.",
+    "solution": "Redémarrer le serveur, vérifier les logs, ou augmenter les ressources (CPU/RAM)."
+  },
+  {
+    "id": 3,
+    "title": "Erreur 504 – Gateway Timeout sur environnement staging Laravel",
+    "problem_text": "L'exécution des appels API à /api/generate-report échouait avec une erreur 504. Les logs NGINX indiquent upstream timed out (110) côté Laravel",
+    "description": "L’erreur 504 s’est produite le 11 juin à 16h40 sur l’environnement staging pendant des tests de charge. L’application Laravel exposée via un proxy NGINX ne répondait pas dans les délais impartis (timeout 60s). Aucun utilisateur final n’a été impacté, mais le déploiement de la release a été bloqué.",
+    "status": "new",
+    "reporter": "admin",
+    "created_at": "2025-06-16 14:00:23",
+    "why_analysis": [
+      "Pourquoi l'erreur 504 s’est-elle produite ? → Timeout côté NGINX",
+      "Pourquoi NGINX a-t-il dépassé le délai ? → Le backend Laravel mettait plus de 60s à répondre",
+      "Pourquoi Laravel prenait-il autant de temps ? → La fonction de génération de rapport effectue des boucles imbriquées sur 10 000+ lignes",
+      "Pourquoi ce traitement n’a-t-il pas été optimisé ? → Aucune mise en cache ou pagination n’était implémentée",
+      "Pourquoi cela n’a-t-il pas été anticipé ? → Les tests de performance sur cet endpoint n’avaient pas été réalisés."
+    ],
+    "root_cause": "Bug logiciel ou mauvaise configuration de l'application.",
+    "solution": [
+      "Appliquer les dernières mises à jour logicielles/patchs.",
+      "Vérifier et corriger les fichiers de configuration de l'application.",
+      "Contacter le support éditeur pour une analyse approfondie du bug."
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Échec de connexion – Jeton Sanctum expiré en production",
+    "problem_text": "Énoncé clair : Les utilisateurs authentifiés via le front-end SPA (Single Page Application) sont redirigés de manière aléatoire vers la page de connexion. L’analyse réseau indique une réponse 401 Unauthorized lors des appels API, malgré un XSRF-TOKEN présent",
+    "description": "Depuis le 8 juin 2025, plusieurs utilisateurs signalent une impossibilité d’accès à leur tableau de bord malgré une session active. L’environnement de production Laravel utilise Sanctum pour la gestion des sessions front-end et API.",
+    "status": "new",
+    "reporter": "admin",
+    "created_at": "2025-06-16 16:16:13",
+    "why_analysis": [
+      "Pourquoi les appels API échouent-ils ? → Jeton non reconnu par Laravel.",
+      "Pourquoi le jeton n’est-il plus reconnu ? → Il a expiré sans renouvellement.",
+      "Pourquoi le jeton n’a-t-il pas été renouvelé ? → Le middleware n’a pas déclenché la rotation.",
+      "Pourquoi le middleware ne s’est-il pas déclenché ? → La route n'était pas correctement protégée (auth:sanctum manquant).",
+      "Pourquoi la protection n’était-elle pas en place ? → Mauvaise configuration post-déploiement lors de la refonte des routes"
+    ],
+    "root_cause": "Bug logiciel, mauvaise configuration de l'application ou problème de déploiement.",
+    "solution": [
+      "Vérifier les logs de l'application pour des erreurs spécifiques ou des stack traces.",
+      "Examiner les fichiers de configuration de l'application et les variables d'environnement.",
+      "Vérifier le bon fonctionnement des middlewares et des routes API.",
+      "S'assurer que toutes les dépendances logicielles sont à jour et compatibles.",
+      "Contacter le support de l'éditeur ou l'équipe de développement pour une analyse approfondie."
+    ]
+  }
+]

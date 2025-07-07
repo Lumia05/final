@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Télécharger un Fichier</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        h1 { color: #333; }
+        .download-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .download-link:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Téléchargement de Fichier</h1>
+
+        {% if attachment %}
+            <p>Le fichier suivant est disponible au téléchargement :</p>
+            <ul>
+                <li>
+                    <a href="{{ url_for('upload_file', filename=attachment.file_path.split('/uploads/')[1] if '/uploads/' in attachment.file_path else attachment.file_path) }}" 
+                       class="download-link" 
+                       download="{{ attachment.filename }}">
+                        Télécharger : {{ attachment.filename }}
+                    </a>
+                </li>
+            </ul>
+        {% else %}
+            <p>Aucun fichier n'est spécifié pour le téléchargement.</p>
+        {% endif %}
+
+        <p>
+            <em>Remarque : Ce code suppose qu'une variable `attachment` est passée à ce template depuis Flask, 
+            et que `attachment` a des propriétés `filename` et `file_path`.</em>
+        </p>
+    </div>
+</body>
+</html>

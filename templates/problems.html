@@ -1,0 +1,862 @@
+{% extends "base.html" %}
+
+<<<<<<< HEAD
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body, .bg-dark-custom { background: #181f2a !important; }
+  .sidebar-dark { background: #232b3e; min-height: 100vh; }
+  .sidebar-dark .nav-link, .sidebar-dark .navbar-brand { color: #b0b8c1; }
+  .sidebar-dark .nav-link.active, .sidebar-dark .nav-link:hover { color: #fff; background: #1a2233; }
+  .dashboard-header { color: #fff; font-size: 2.2rem; font-weight: bold; margin-bottom: 2rem; }
+  .btn-primary, .btn-success, .btn-danger { border-radius: 8px; }
+  .table-dark th, .table-dark td { vertical-align: middle; }
+  .offcanvas-header, .offcanvas-body { background: #232b3e; color: #fff; }
+  .modal-content { background: #232b3e; color: #fff; }
+  .form-label { color: #b0b8c1; }
+  .btn-ai { background: #7c3aed; color: #fff; border: none; }
+  .btn-ai:hover { background: #6b2ad1; } /* Darker shade on hover */
+  .btn-ai:focus { box-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.5); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex">
+   
+    <div class="container-fluid p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+                <button class="btn btn-outline-light btn-lg rounded-pill shadow-sm px-2 me-3" style="background: #7c3aed;" onclick="window.location.href='/dashboard'">
+    <i class="fas fa-arrow-left me-2"></i> Sortir
+                </button>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">        
+            <h1 class="dashboard-header mb-0">Gestion des Problèmes</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProblemModal">
+                <i class="fas fa-plus"></i> Nouveau Problème
+            </button>
+        </div>
+
+        <div class="card bg-dark-custom shadow-sm mb-4">
+            <div class="card-header bg-dark text-white">
+                Liste des Problèmes
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Titre</th>
+                                <th>Description</th>
+                                <th>Cause Racine</th>
+                                <th>Solutions</th>
+                                <th>Statut</th>
+                                <th>Assigné à</th>
+                                <th>Créé le</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for problem in problems %}
+                            <tr>
+                                <td>{{ problem.id }}</td>
+                                <td>{{ problem.title }}</td>
+                                <td>{{ problem.description[:100] }}...</td>
+                                <td>{{ problem.root_cause[:100] if problem.root_cause else '' }}...</td>
+                                <td>{{ problem.solutions[:100] if problem.solutions else '' }}...</td>
+                                <td>{{ problem.status.value if problem.status else 'N/A' }}</td>
+                                <td>{{ problem.assigned_to.email if problem.assigned_to else 'Non assigné' }}</td>
+                                <td>{{ problem.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-info" onclick="viewProblem({{ problem.id }})">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-warning" onclick="editProblem({{ problem.id }})">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteProblem({{ problem.id }})">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center">Aucun problème trouvé.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="createProblemModal" tabindex="-1" aria-labelledby="createProblemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="createProblemModalLabel">Créer un Nouveau Problème</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="problemForm">
+                    <input type="hidden" id="problem_id" name="problem_id">
+                    <div class="mb-3">
+                        <label for="problem_context" class="form-label">Titre du Problème:</label>
+                        <input type="text" class="form-control" id="problem_context" name="problem_context" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="incident_desc" class="form-label">Description du Problème (Incident):</label>
+                        <textarea class="form-control" id="incident_desc" name="incident_desc" rows="4" required></textarea>
+                    </div>
+
+                    <h5 class="mt-4 text-white">Analyse des 5 Pourquoi</h5>
+                    <p class="text-muted small">L'IA peut générer cette analyse pour vous.</p>
+                    <div class="mb-3">
+                        <label for="why1" class="form-label">Pourquoi 1:</label>
+                        <input type="text" class="form-control" id="why1" name="why1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="why2" class="form-label">Pourquoi 2:</label>
+                        <input type="text" class="form-control" id="why2" name="why2">
+                    </div>
+                    <div class="mb-3">
+                        <label for="why3" class="form-label">Pourquoi 3:</label>
+                        <input type="text" class="form-control" id="why3" name="why3">
+                    </div>
+                    <div class="mb-3">
+                        <label for="why4" class="form-label">Pourquoi 4:</label>
+                        <input type="text" class="form-control" id="why4" name="why4">
+                    </div>
+                    <div class="mb-3">
+                        <label for="why5" class="form-label">Pourquoi 5:</label>
+                        <input type="text" class="form-control" id="why5" name="why5">
+                    </div>
+                    <button type="button" class="btn btn-ai mb-3" onclick="suggestSolutions()">
+                        <i class="fas fa-magic"></i> Suggérer avec l'IA
+                    </button>
+
+                    <div class="mb-3">
+                        <label for="root_cause" class="form-label">Cause Racine:</label>
+                        <textarea class="form-control" id="root_cause" name="root_cause" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="suggested_solutions" class="form-label">Solutions Proposées:</label>
+                        <textarea class="form-control" id="suggested_solutions" name="suggested_solutions" rows="5" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Statut:</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="OPEN">Ouvert</option>
+                            <option value="IN_PROGRESS">En Cours</option>
+                            <option value="RESOLVED">Résolu</option>
+                            <option value="CLOSED">Fermé</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="assigned_to_id" class="form-label">Assigné à:</label>
+                        <select class="form-select" id="assigned_to_id" name="assigned_to_id">
+                            </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enregistrer Problème</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE VISUALISATION DU PROBLÈME -->
+<div class="modal fade" id="viewProblemModal" tabindex="-1" aria-labelledby="viewProblemModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="viewProblemModalLabel">Détails du Problème</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <dl class="row">
+          <dt class="col-sm-3">Titre</dt>
+          <dd class="col-sm-9" id="view_problem_title"></dd>
+          <dt class="col-sm-3">Description</dt>
+          <dd class="col-sm-9" id="view_problem_description"></dd>
+          <dt class="col-sm-3">Cause Racine</dt>
+          <dd class="col-sm-9" id="view_problem_root_cause"></dd>
+          <dt class="col-sm-3">Solutions</dt>
+          <dd class="col-sm-9" id="view_problem_solutions"></dd>
+          <dt class="col-sm-3">Statut</dt>
+          <dd class="col-sm-9" id="view_problem_status"></dd>
+          <dt class="col-sm-3">Assigné à</dt>
+          <dd class="col-sm-9" id="view_problem_assigned_to"></dd>
+          <dt class="col-sm-3">Créé le</dt>
+          <dd class="col-sm-9" id="view_problem_created_at"></dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadUsersForAssignment(); // Charger les utilisateurs au chargement du DOM
+
+    // Gestion de la soumission du formulaire
+    document.getElementById('problemForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Empêche la soumission par défaut du formulaire
+
+        const form = event.target;
+        const problemId = document.getElementById('problem_id').value;
+        const url = problemId ? `/api/problems/${problemId}` : '/api/problems';
+        const method = problemId ? 'PUT' : 'POST'; // Si c'est un problème existant, utilisez PUT
+
+        const data = {
+            title: document.getElementById('problem_context').value,
+            description: document.getElementById('incident_desc').value,
+            root_cause: document.getElementById('root_cause').value,
+            suggested_solutions: document.getElementById('suggested_solutions').value,
+            status: document.getElementById('status').value,
+            assigned_to_id: document.getElementById('assigned_to_id').value || null // Assurez-vous que c'est null si non sélectionné
+            // Si vous voulez enregistrer les why1-why5 dans le modèle Problem de la BDD,
+            // vous devrez les ajouter ici et modifier votre modèle Problem dans app.py
+        };
+
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.message || 'Erreur lors de la sauvegarde du problème.'); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert(data.message);
+            var problemModal = bootstrap.Modal.getInstance(document.getElementById('createProblemModal'));
+            problemModal.hide();
+            location.reload(); // Recharger la page pour voir les changements
+        })
+        .catch(error => {
+            alert(error.message);
+            console.error('Erreur:', error);
+        });
+    });
+
+});
+
+// Fonction pour charger les utilisateurs dans le sélecteur "Assigné à"
+function loadUsersForAssignment() {
+    fetch('/api/users')
+        .then(response => response.json())
+        .then(users => {
+            const selectElement = document.getElementById('assigned_to_id');
+            selectElement.innerHTML = '<option value="">Sélectionner un utilisateur</option>'; // Option par défaut
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.email;
+                selectElement.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Erreur lors du chargement des utilisateurs:', error));
+}
+
+
+// MODIFICATION CRUCIALE ICI : suggestSolutions()
+async function suggestSolutions() {
+    const title = document.getElementById('problem_context').value;
+    const description = document.getElementById('incident_desc').value;
+
+    const why1Input = document.getElementById('why1');
+    const why2Input = document.getElementById('why2');
+    const why3Input = document.getElementById('why3');
+    const why4Input = document.getElementById('why4');
+    const why5Input = document.getElementById('why5');
+    const rootCauseTextarea = document.getElementById('root_cause');
+    const solutionsTextarea = document.getElementById('suggested_solutions');
+
+    // Activer les champs pour la modification par l'IA
+    rootCauseTextarea.readOnly = false;
+    solutionsTextarea.readOnly = false;
+
+    // Réinitialiser les champs et afficher un indicateur de chargement
+    why1Input.value = '';
+    why2Input.value = '';
+    why3Input.value = '';
+    why4Input.value = '';
+    why5Input.value = '';
+    rootCauseTextarea.value = 'Génération en cours...';
+    solutionsTextarea.value = 'Génération en cours...';
+
+    if (!title && !description) {
+        alert('Veuillez remplir au moins le titre ou la description du problème pour obtenir des suggestions.');
+        rootCauseTextarea.value = ''; // Réinitialiser le message de chargement
+        solutionsTextarea.value = '';
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/problems/suggest_root_cause', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, description }) // N'envoyez que le titre et la description
+        });
+
+        if (!response.ok) {
+            throw new Error('La réponse du serveur n\'était pas OK');
+        }
+
+        const data = await response.json();
+        
+        // Mettre à jour les champs avec la réponse de l'IA
+        why1Input.value = data.whys[0] || '';
+        why2Input.value = data.whys[1] || '';
+        why3Input.value = data.whys[2] || '';
+        why4Input.value = data.whys[3] || '';
+        why5Input.value = data.whys[4] || '';
+        rootCauseTextarea.value = data.root_cause || 'Non fournie par l\'IA.';
+        solutionsTextarea.value = data.solutions || 'Non fournies par l\'IA.';
+
+    } catch (error) {
+        console.error('Erreur lors de la suggestion de solutions:', error);
+        rootCauseTextarea.value = 'Erreur lors de la génération.';
+        solutionsTextarea.value = 'Erreur lors de la génération.';
+    } finally {
+        // Optionnel : Rendre les champs à nouveau readonly si vous le souhaitez
+        // rootCauseTextarea.readOnly = true;
+        // solutionsTextarea.readOnly = true;
+    }
+}
+
+
+// Fonctions pour gérer les problèmes existants (non modifiées ici, mais incluses pour contexte)
+function viewProblem(id) {
+    fetch(`/api/problems/${id}`)
+        .then(response => response.json())
+        .then(problem => {
+            document.getElementById('view_problem_title').textContent = problem.title;
+            document.getElementById('view_problem_description').textContent = problem.description;
+            document.getElementById('view_problem_root_cause').textContent = problem.root_cause || '';
+            document.getElementById('view_problem_solutions').textContent = problem.suggested_solutions || '';
+            document.getElementById('view_problem_status').textContent = problem.status || '';
+            document.getElementById('view_problem_assigned_to').textContent = problem.assigned_to_email || '';
+            document.getElementById('view_problem_created_at').textContent = problem.created_at || '';
+            var viewModal = new bootstrap.Modal(document.getElementById('viewProblemModal'));
+            viewModal.show();
+        })
+        .catch(error => {
+            alert('Erreur lors de la récupération des détails du problème.');
+            console.error(error);
+        });
+}
+
+function editProblem(id) {
+    fetch(`/api/problems/${id}`)
+        .then(response => response.json())
+        .then(problem => {
+            document.getElementById('problem_id').value = problem.id;
+            document.getElementById('problem_context').value = problem.title;
+            document.getElementById('incident_desc').value = problem.description;
+            document.getElementById('root_cause').value = problem.root_cause;
+            document.getElementById('status').value = problem.status;
+            document.getElementById('assigned_to_id').value = problem.assigned_to_id;
+            document.getElementById('suggested_solutions').value = problem.solutions || '';
+            var createProblemModal = new bootstrap.Modal(document.getElementById('createProblemModal'));
+            createProblemModal.show();
+        })
+        .catch(error => console.error('Erreur lors du chargement du problème pour édition:', error));
+}
+
+function deleteProblem(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce problème ?')) {
+        fetch(`/api/problems/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.message || 'Erreur lors de la suppression du problème.'); });
+            }
+            alert('Problème supprimé avec succès.');
+            location.reload();
+        })
+        .catch(error => {
+            alert(error.message);
+            console.error('Erreur:', error);
+        });
+    }
+}
+</script>
+{% endblock %}
+=======
+{% block content %}
+<style>
+  body, .main-content {
+    background: #16213e !important;
+  }
+  .problem-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(22,33,62,0.10);
+    padding: 36px 32px 28px 32px;
+    max-width: 1200px;
+    margin: 40px auto;
+    color: #16213e;
+  }
+  .form-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .form-label {
+    color: #2056b3;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .form-control, select.form-select {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    color: #16213e;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+  .form-control:focus, select.form-select:focus {
+    border-color: #2056b3;
+    box-shadow: 0 0 0 3px rgba(32,86,179,0.1);
+  }
+  textarea.form-control {
+    min-height: 70px;
+    resize: vertical;
+    font-size: 1.05em;
+  }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f4f8fc;
+  }
+  .section-title {
+    font-size: 1.5em;
+    color: #2056b3;
+    font-weight: bold;
+    margin: 0;
+  }
+  .btn-create {
+    background: #2056b3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-create:hover {
+    background: #16213e;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+  .why-section {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 24px;
+  }
+  .solutions-section {
+    margin-top: 24px;
+  }
+  .why-group {
+    margin-bottom: 20px;
+  }
+  .why-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2056b3;
+    font-weight: 500;
+  }
+  .why-group textarea {
+    width: 100%;
+    min-height: 60px;
+  }
+  .btn-submit {
+    background: #2056b3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-weight: 600;
+    margin-top: 24px;
+    transition: all 0.2s;
+  }
+  .btn-submit:hover {
+    background: #16213e;
+    transform: translateY(-1px);
+  }
+  .btn-primary, .btn-info {
+    border-radius: 8px;
+    font-size: 1.08em;
+    font-weight: 600;
+    padding: 12px 28px;
+    margin-top: 10px;
+    box-shadow: 0 2px 8px rgba(32,86,179,0.10);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary {
+    background: #7c3aed;
+    color: #fff;
+    border: none;
+  }
+  .btn-primary:hover {
+    background: #5b21b6;
+    color: #fff;
+  }
+  .btn-info {
+    background: #38bdf8;
+    color: #fff;
+    border: none;
+    padding: 12px 16px;
+  }
+  .btn-info:hover {
+    background: #0ea5e9;
+    color: #fff;
+  }
+  .text-end {
+    margin-top: 18px;
+  }
+  .problems-list {
+    margin-top: 40px;
+  }
+  .problem-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+  }
+  .problem-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .problem-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .problem-title {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #2056b3;
+    margin: 0;
+  }
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 500;
+  }
+  .status-open { background: #f0f9ff; color: #0369a1; }
+  .status-in_progress { background: #faf5ff; color: #7e22ce; }
+  .status-resolved { background: #f0fdf4; color: #16a34a; }
+  .status-closed { background: #f3f4f6; color: #4b5563; }
+  .table-responsive {
+    margin-top: 24px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+  .table {
+    margin-bottom: 0;
+  }
+  .table th {
+    background: #f8fafc;
+    color: #2056b3;
+    font-weight: 600;
+    border: none;
+    padding: 16px;
+  }
+  .table td {
+    padding: 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f4f8fc;
+  }
+  .table tr:last-child td {
+    border-bottom: none;
+  }
+  .btn-action {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    margin: 0 4px;
+  }
+  .mb-3 {
+    margin-bottom: 22px !important;
+  }
+</style>
+
+<div class="problem-card">
+  <div class="section-header">
+    <h2 class="section-title">Liste des Problèmes</h2>
+    <button type="button" class="btn btn-create" onclick="toggleForm()">
+      <i class="fas fa-plus"></i> Créer un problème
+    </button>
+  </div>
+
+  <div id="problemForm" class="form-section" style="display: none;">
+    <form method="POST" id="createProblemForm">
+      <div class="mb-3">
+        <label for="title" class="form-label">Problème (Titre)</label>
+        <input type="text" class="form-control" id="title" name="title" required 
+               placeholder="Entrez un titre descriptif du problème">
+      </div>
+
+      <div class="mb-3">
+        <label for="description" class="form-label">Description (détails du problème)</label>
+        <textarea class="form-control" id="description" name="description" rows="3" required
+                  placeholder="Décrivez le problème en détail"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="status" class="form-label">Statut</label>
+        <select id="status" name="status" class="form-select">
+          <option value="OPEN">Ouvert</option>
+          <option value="IN_PROGRESS">En cours</option>
+          <option value="RESOLVED">Résolu</option>
+          <option value="CLOSED">Fermé</option>
+        </select>
+      </div>
+
+      <div class="why-section">
+        <h3 class="mb-4">Analyse des 5 Pourquoi</h3>
+        
+        <div class="why-group">
+          <label for="why1">Pourquoi 1 : Pourquoi le problème est-il survenu ?</label>
+          <textarea class="form-control" id="why1" name="why1" required></textarea>
+        </div>
+
+        <div class="why-group">
+          <label for="why2">Pourquoi 2 : Pourquoi la cause précédente est-elle survenue ?</label>
+          <textarea class="form-control" id="why2" name="why2" required></textarea>
+        </div>
+
+        <div class="why-group">
+          <label for="why3">Pourquoi 3 : Et pourquoi cela ?</label>
+          <textarea class="form-control" id="why3" name="why3" required></textarea>
+        </div>
+
+        <div class="why-group">
+          <label for="why4">Pourquoi 4 : Quelle en est la cause plus profonde ?</label>
+          <textarea class="form-control" id="why4" name="why4" required></textarea>
+        </div>
+
+        <div class="why-group">
+          <label for="why5">Pourquoi 5 : Quelle est la cause racine ?</label>
+          <textarea class="form-control" id="why5" name="why5" required></textarea>
+        </div>
+      </div>
+
+      <div class="solutions-section">
+        <label for="root_cause" class="form-label">Cause racine identifiée</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <textarea class="form-control" id="root_cause" name="root_cause" rows="2" required placeholder="Résumez la cause racine identifiée"></textarea>
+          <button type="button" class="btn btn-info" onclick="suggestRootCauseAI()" title="Suggérer avec l'IA"><i class="fas fa-robot"></i></button>
+        </div>
+
+        <label for="suggested_solutions" class="form-label mt-3">Solutions suggérées</label>
+        <textarea class="form-control" id="suggested_solutions" name="suggested_solutions" rows="3" required placeholder="Proposez des solutions pour résoudre le problème à sa racine"></textarea>
+      </div>
+
+      <div class="text-end">
+        <button type="button" class="btn btn-primary me-2" onclick="suggestSolutions()">
+          <i class="fas fa-lightbulb"></i> Suggérer causes racines & solutions
+        </button>
+        <button type="submit" class="btn btn-submit">Enregistrer le problème</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Titre</th>
+          <th>Description</th>
+          <th>Statut</th>
+          <th>Cause Racine</th>
+          <th>Solutions Suggérées</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if problems %}
+          {% for problem in problems %}
+          <tr>
+            <td>{{ problem.title }}</td>
+            <td>{{ problem.description[:100] }}...</td>
+            <td>
+              <span class="status-badge status-{{ problem.status.lower() }}">
+                {{ problem.status }}
+              </span>
+            </td>
+            <td>{{ problem.root_cause[:100] if problem.root_cause else '-' }}</td>
+            <td>{{ problem.suggested_solutions[:100] if problem.suggested_solutions else '-' }}</td>
+            <td>
+              <button class="btn btn-action btn-outline-primary" onclick="editProblem({{ problem.id }})">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-action btn-outline-danger" onclick="deleteProblem({{ problem.id }})">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6" class="text-center text-muted">Aucun problème enregistré.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleForm() {
+  const form = document.getElementById('problemForm');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function suggestSolutions() {
+  // Récupérer les valeurs des champs
+  const title = document.getElementById('title').value;
+  const description = document.getElementById('description').value;
+  const why1 = document.getElementById('why1').value;
+  const why2 = document.getElementById('why2').value;
+  const why3 = document.getElementById('why3').value;
+  const why4 = document.getElementById('why4').value;
+  const why5 = document.getElementById('why5').value;
+
+  // Vérifier si les champs nécessaires sont remplis
+  if (!title || !description || !why1) {
+    alert('Veuillez remplir au moins le titre, la description et le premier "Pourquoi" pour obtenir des suggestions.');
+    return;
+  }
+
+  // Analyser les réponses et suggérer une cause racine
+  let rootCause = '';
+  if (why5) {
+    rootCause = why5;
+  } else if (why4) {
+    rootCause = why4;
+  } else if (why3) {
+    rootCause = why3;
+  } else if (why2) {
+    rootCause = why2;
+  } else {
+    rootCause = why1;
+  }
+
+  // Mettre à jour le champ de cause racine
+  document.getElementById('root_cause').value = rootCause;
+
+  // Générer des suggestions de solutions basées sur la cause racine
+  let suggestedSolutions = 'Solutions suggérées basées sur l\'analyse :\n\n';
+  suggestedSolutions += '1. Mettre en place des mesures préventives pour éviter la récurrence de : ' + rootCause + '\n';
+  suggestedSolutions += '2. Former les équipes sur la détection précoce de ce type de problème\n';
+  suggestedSolutions += '3. Établir des procédures de contrôle et de suivi\n';
+  suggestedSolutions += '4. Mettre en place des indicateurs de performance pour mesurer l\'efficacité des solutions';
+
+  // Mettre à jour le champ des solutions suggérées
+  document.getElementById('suggested_solutions').value = suggestedSolutions;
+}
+
+function suggestRootCauseAI() {
+  const why1 = document.getElementById('why1').value;
+  const why2 = document.getElementById('why2').value;
+  const why3 = document.getElementById('why3').value;
+  const why4 = document.getElementById('why4').value;
+  const why5 = document.getElementById('why5').value;
+  fetch('/api/problems/suggest_root_cause', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ why1, why2, why3, why4, why5 })
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('root_cause').value = data.root_cause;
+    document.getElementById('suggested_solutions').value = data.solutions.join('\n');
+  })
+  .catch(() => alert("Erreur lors de la suggestion IA"));
+}
+
+function editProblem(id) {
+  // TODO: Implémenter l'édition
+  console.log('Éditer le problème:', id);
+}
+
+function deleteProblem(id) {
+  if (confirm('Êtes-vous sûr de vouloir supprimer ce problème ?')) {
+    fetch(`/problems/${id}/delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert('Erreur lors de la suppression du problème');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Erreur lors de la suppression du problème');
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('createProblemForm');
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(form);
+    fetch('/problems', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        throw new Error('Erreur lors de la création du problème');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert(error.message);
+    });
+  });
+});
+</script>
+{% endblock %} 
+>>>>>>> 45da105 (Premier commit)

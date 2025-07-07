@@ -1,0 +1,414 @@
+{% extends "base.html" %}
+<<<<<<< HEAD
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body, .bg-dark-custom { background: #181f2a !important; }
+  .sidebar-dark { background: #232b3e; min-height: 100vh; }
+  .sidebar-dark .nav-link, .sidebar-dark .navbar-brand { color: #b0b8c1; }
+  .sidebar-dark .nav-link.active, .sidebar-dark .nav-link:hover { color: #fff; background: #1a2233; }
+  .dashboard-header { color: #fff; font-size: 2.2rem; font-weight: bold; margin-bottom: 2rem; }
+  .btn-primary, .btn-success, .btn-danger { border-radius: 8px; }
+  .table-dark th, .table-dark td { vertical-align: middle; }
+  .offcanvas-header, .offcanvas-body { background: #232b3e; color: #fff; }
+  .modal-content { background: #232b3e; color: #fff; }
+  .form-label { color: #b0b8c1; }
+  /* Style pour tronquer le texte et gérer l'espace dans les cellules de tableau */
+  .text-truncate-cell {
+      max-width: 250px; /* Ajustez selon vos besoins */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid bg-dark-custom py-4">
+  <div class="row">
+    <nav class="col-md-2 d-none d-md-block sidebar-dark sidebar">
+      <div class="position-sticky pt-4">
+        <ul class="nav flex-column">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('incidents') }}"><i class="fas fa-exclamation-circle me-2"></i> Incidents</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('problems') }}"><i class="fas fa-bug me-2"></i> Problèmes</a></li>
+          <li class="nav-item"><a class="nav-link active" href="{{ url_for('knowledge') }}"><i class="fas fa-book me-2"></i> Base de connaissances</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('users') }}"><i class="fas fa-cog me-2"></i> Users</a></li>
+        </ul>
+      </div>
+    </nav>
+    <main class="col-md-10 ms-sm-auto px-md-5 py-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="dashboard-header">Base de Connaissances</div>
+        <a href="{{ url_for('create_knowledge_article') }}" class="btn btn-primary mb-3">
+            <i class="fas fa-plus"></i> Créer un Nouvel Article
+        </a>
+      </div>
+      <div class="card bg-dark text-white shadow-sm mb-4">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Titre</th>
+                  <th>Fichier (Contenu)</th> {# Renommé pour plus de clarté #}
+                  <th>Catégorie</th>
+                  <th>Auteur</th>
+                  <th>Date</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for article in articles %}
+                <tr>
+                  <td>{{ article.id }}</td>
+                  <td>
+                      <a href="{{ url_for('view_knowledge_article', id=article.id) }}" class="text-decoration-none text-white">
+                          {{ article.title }}
+                      </a>
+                  </td>
+                  <td>
+                    {% if article.content %}
+                      <i class="fas fa-file-alt me-1"></i> {# Icône de fichier #}
+                      <a href="{{ url_for('uploaded_file', filename=article.content) }}" 
+                        download="{{ article.content }}" 
+                        class="text-info text-decoration-none">
+                        {{ article.content }}
+                      </a>
+                    {% else %}
+                      <small class="text-muted">Pas de fichier associé</small>
+                    {% endif %}
+                  </td>
+                  <td>{{ article.category }}</td>
+                  <td>{{ article.author.username if article.author else 'N/A' }}</td> {# Afficher le nom d'utilisateur #}
+                  <td>{{ article.created_at.strftime('%Y-%m-%d') }}</td>
+                  <td><span class="badge bg-{{ 'success' if article.status.value=='Publié' else 'warning' if article.status.value=='Brouillon' else 'secondary' }}">{{ article.status.value }}</span></td> {# Utiliser .value pour l'énumération #}
+                  <td>
+                    <a class="btn btn-sm btn-info me-1" href="{{ url_for('view_knowledge_article', id=article.id) }}" title="Voir"><i class="fas fa-eye"></i></a>
+                    <a class="btn btn-sm btn-outline-secondary me-1" href="{{ url_for('edit_knowledge_article', id=article.id) }}" title="Modifier">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <form method="post" action="{{ url_for('delete_knowledge_article', id=article.id) }}" class="d-inline" onsubmit="return confirm('Supprimer cet article ?');">
+                      <button class="btn btn-sm btn-danger" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+=======
+{% block title %}Base de Connaissances{% endblock %}
+
+{% block content %}
+<style>
+  body, .bg-dark-custom {
+    background: #fff !important;
+  }
+  .knowledge-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(22,33,62,0.10);
+    padding: 36px 32px 28px 32px;
+    margin: 40px auto;
+    color: #16213e;
+    max-width: 1300px;
+    width: 100%;
+  }
+  .search-section {
+    background: #f4f8fc;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: none;
+  }
+  .form-control {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    color: #16213e;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1em;
+    box-shadow: none;
+    transition: border-color 0.2s;
+  }
+  .form-control:focus {
+    border-color: #2056b3;
+    box-shadow: 0 0 0 3px rgba(32,86,179,0.10);
+    background: #fff;
+    color: #16213e;
+  }
+  .input-group .btn {
+    border-radius: 8px;
+    background: #2056b3;
+    color: #fff;
+    border: none;
+    transition: background 0.2s;
+  }
+  .input-group .btn:hover {
+    background: #7c3aed;
+    color: #fff;
+  }
+  .category-filter {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .category-badge {
+    background: #e6f3ff;
+    color: #2056b3;
+    border: none;
+  }
+  .category-badge.active {
+    background: #2056b3;
+    color: #fff;
+  }
+  .category-badge:not(.active):hover {
+    background: #2563eb;
+    color: #fff;
+  }
+  .article-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+    margin-top: 28px;
+  }
+  .article-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    color: #16213e;
+    box-shadow: none;
+  }
+  .article-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(22,33,62,0.08);
+    border-color: #7c3aed;
+  }
+  .article-title {
+    color: #2056b3;
+  }
+  .article-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .article-title a:hover {
+    text-decoration: underline;
+  }
+  .importance-badge {
+    font-size: 0.8em;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .importance-critical { background: #fee2e2; color: #dc2626; }
+  .importance-high { background: #fef3c7; color: #d97706; }
+  .importance-medium { background: #e0f2fe; color: #0284c7; }
+  .importance-low { background: #f3f4f6; color: #4b5563; }
+  .article-meta {
+    font-size: 0.9em;
+    color: #b0b8c1;
+    margin: 8px 0;
+  }
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .tag {
+    background: #f3f4f6;
+    color: #4b5563;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    border: none;
+  }
+  .status-badge {
+    font-size: 0.8em;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .status-draft { background: #f3f4f6; color: #4b5563; }
+  .status-review { background: #fef3c7; color: #d97706; }
+  .status-published { background: #dcfce7; color: #15803d; }
+  .article-actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+  }
+  .action-icon {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    font-size: 1.25em;
+    background: #fff;
+    transition: border-color 0.18s, color 0.18s, background 0.18s;
+    cursor: pointer;
+    margin: 0 2px;
+    padding: 0;
+    box-shadow: none;
+  }
+  .action-icon.edit {
+    border-color: #2563eb;
+    color: #2563eb;
+  }
+  .action-icon.edit:hover {
+    background: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+  }
+  .action-icon.delete {
+    border-color: #dc2626;
+    color: #dc2626;
+  }
+  .action-icon.delete:hover {
+    background: #dc2626;
+    color: #fff;
+    border-color: #dc2626;
+  }
+  .action-icon i {
+    color: inherit !important;
+    font-size: 1.2em;
+    line-height: 1;
+    vertical-align: middle;
+    display: inline-block;
+  }
+</style>
+
+<div class="knowledge-card">
+  <div class="d-flex align-items-center mb-4" style="gap: 16px;">
+    <h2 class="mb-0">Base de Connaissances</h2>
+    <a href="{{ url_for('create_knowledge_article') }}" class="btn btn-primary ms-auto" style="background: #7c3aed; border: none; min-width: unset; width: auto; white-space: nowrap;">
+      <i class="fas fa-plus-circle"></i> Nouvel Article
+    </a>
+  </div>
+
+  <div class="search-section mb-4">
+    <div class="input-group">
+      <input type="text" class="form-control" placeholder="Rechercher dans la base de connaissances..." id="searchInput">
+      <button class="btn btn-outline-secondary" type="button">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+
+    <div class="category-filter">
+      <span class="category-badge active">Tous</span>
+      <span class="category-badge">Infrastructure</span>
+      <span class="category-badge">Applications</span>
+      <span class="category-badge">Sécurité</span>
+      <span class="category-badge">Procédures</span>
+      <span class="category-badge">FAQ</span>
+    </div>
+  </div>
+
+  <div class="article-grid">
+    {% for article in articles %}
+    <div class="article-card">
+      <div class="article-header">
+        <h3 class="article-title">
+          <a href="{{ url_for('view_knowledge_article', id=article.id) }}">
+            {{ article.title }}
+          </a>
+        </h3>
+        <span class="importance-badge importance-{{ article.importance.lower() }}">
+          {{ article.importance }}
+        </span>
+      </div>
+      <div class="article-meta">
+        <span class="status-badge status-{{ article.status.lower() }}">{{ article.status }}</span>
+        <span>· {{ article.created_at.strftime('%d/%m/%Y') }}</span>
+        {% if article.author %}
+        <span>· {{ article.author.email }}</span>
+        {% endif %}
+      </div>
+      <p class="article-preview">{{ article.content[:150] }}...</p>
+      <div class="article-tags">
+        {% for tag in article.tags %}
+        <span class="tag">{{ tag.name }}</span>
+        {% endfor %}
+      </div>
+      <div class="article-actions">
+        <a href="{{ url_for('edit_knowledge_article', id=article.id) }}" class="action-icon edit" title="Éditer">
+          <i class="fas fa-edit" style="font-size:1.2em;"></i>
+        </a>
+        <button class="action-icon delete" onclick="deleteArticle({{ article.id }})" title="Supprimer" type="button">
+          <i class="fas fa-trash" style="font-size:1.2em;"></i>
+        </button>
+      </div>
+    </div>
+    {% else %}
+    <div class="text-center text-secondary">
+      <p>Aucun article trouvé.</p>
+    </div>
+    {% endfor %}
+>>>>>>> 45da105 (Premier commit)
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<<<<<<< HEAD
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+=======
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Gestion des filtres par catégorie
+  const categoryBadges = document.querySelectorAll('.category-badge');
+  categoryBadges.forEach(badge => {
+    badge.addEventListener('click', function() {
+      categoryBadges.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      // TODO: Implémenter le filtrage
+    });
+  });
+
+  // Gestion de la recherche
+  const searchInput = document.getElementById('searchInput');
+  let timeout = null;
+  searchInput.addEventListener('input', function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      // TODO: Implémenter la recherche
+      console.log('Recherche:', this.value);
+    }, 500);
+  });
+});
+
+function deleteArticle(articleId) {
+  if (confirm('Êtes-vous sûr de vouloir supprimer cet article ?')) {
+    fetch(`/knowledge/${articleId}/delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert('Erreur lors de la suppression de l\'article');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Erreur lors de la suppression de l\'article');
+    });
+  }
+}
+</script>
+>>>>>>> 45da105 (Premier commit)
+{% endblock %}
