@@ -6,6 +6,7 @@ Application ITIL Management System - Version Flask
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
@@ -33,6 +34,7 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+migrate = Migrate(app, db)
 
 # Enums
 class Priority(enum.Enum):
@@ -107,7 +109,7 @@ class User(UserMixin, db.Model):
     
     id = db.Column(db.Integer, primary_key=True, index=True)
     email = db.Column(db.String(255), unique=True, index=True, nullable=False)
-    hashed_password = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     team = db.Column(db.String(255))
     role = db.Column(db.String(20), default="user")  # 'admin' ou 'user'
@@ -189,7 +191,7 @@ def create_default_admin():
     if not admin:
         admin_user = User(
             email="admin@admin.com",
-            hashed_password=generate_password_hash("admin123"),
+            password_hash=generate_password_hash("admin123"),
             is_active=True,
             team="admin",
             role="admin"
@@ -228,7 +230,7 @@ def login():
         password = request.form.get('password')
         
         user = User.query.filter_by(email=email).first()
-        if user and check_password_hash(user.hashed_password, password):
+        if user and check_password_hash(user.password_hash, password):
             login_user(user)
             flash('Connexion réussie!', 'success')
             return redirect(url_for('dashboard'))
@@ -254,7 +256,7 @@ def register():
         # Créer le nouvel utilisateur
         new_user = User(
             email=email,
-            hashed_password=generate_password_hash(password),
+            password_hash=generate_password_hash(password),
             team=team,
             role=role
         )

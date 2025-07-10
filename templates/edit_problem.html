@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Éditer le Problème{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Éditer le Problème</h2>
+    <form method="POST" action="/api/problems/{{ problem.id }}" id="editProblemForm">
+        <div class="mb-3">
+            <label for="title" class="form-label">Titre du Problème</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ problem.title }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required>{{ problem.description }}</textarea>
+        </div>
+        <div class="mb-3">
+            <label for="root_cause" class="form-label">Cause Racine</label>
+            <input type="text" class="form-control" id="root_cause" name="root_cause" value="{{ problem.root_cause }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+        <a href="/problems" class="btn btn-secondary ms-2">Annuler</a>
+    </form>
+</div>
+{% endblock %} 
